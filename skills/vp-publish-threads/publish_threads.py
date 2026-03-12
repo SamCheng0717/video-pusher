@@ -106,14 +106,14 @@ def publish(file_path, title, description, tags, group):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Threads 自动发布 —— 支持纯文字或带媒体发布，需手动点击发帖",
-        epilog="示例：\n  %(prog)s --title \"正文内容\" --group \"A组\"\n  %(prog)s --file photo.jpg --title \"正文内容\" --group \"A组\"",
+        description="Threads auto-publish — supports text-only or media posts, user clicks post manually",
+        epilog='Examples:\n  %(prog)s --title "Post text" --group "GroupA"\n  %(prog)s --file photo.jpg --title "Post text" --group "GroupA"',
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--file",        default="",    help="图片或视频文件路径，选填（不填则纯文字发布）")
-    parser.add_argument("--title",       required=True, help="帖子正文开头，必填")
-    parser.add_argument("--description", default="",    help="正文补充内容，选填")
-    parser.add_argument("--tags",        default="",    help="标签，空格分隔，自动添加 # 前缀，选填")
-    parser.add_argument("--group",       required=True, help="账号组名称，必须已通过 vp-accounts 完成登录")
+    parser.add_argument("--file",        default="",    help="image or video file path, optional (omit for text-only post)")
+    parser.add_argument("--title",       required=True, help="post text (used as opening line), required")
+    parser.add_argument("--description", default="",    help="additional body text, optional")
+    parser.add_argument("--tags",        default="",    help="hashtags, space-separated, # added automatically, optional")
+    parser.add_argument("--group",       required=True, help="account group name (must be logged in via vp-accounts)")
     args = parser.parse_args()
     publish(args.file or None, args.title, args.description, args.tags, args.group)

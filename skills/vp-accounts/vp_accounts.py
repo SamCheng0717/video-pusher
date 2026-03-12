@@ -164,27 +164,27 @@ def cmd_status(group_name, platform):
 def main():
     parser = argparse.ArgumentParser(
         prog="vp_accounts",
-        description="多平台发布账号组管理工具",
-        epilog="示例：\n  %(prog)s add \"A组\"\n  %(prog)s login \"A组\" douyin\n  %(prog)s list",
+        description="Account group manager for multi-platform publishing",
+        epilog='Examples:\n  %(prog)s add "GroupA"\n  %(prog)s login "GroupA" douyin\n  %(prog)s list',
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    sub = parser.add_subparsers(dest="cmd", required=True, metavar="命令")
+    sub = parser.add_subparsers(dest="cmd", required=True, metavar="command")
 
-    sub.add_parser("list", help="列出所有账号组及各平台登录状态")
+    sub.add_parser("list", help="list all account groups and their login status")
 
-    p_add = sub.add_parser("add", help="创建新账号组")
-    p_add.add_argument("name", metavar="账号组名称")
+    p_add = sub.add_parser("add", help="create a new account group")
+    p_add.add_argument("name", metavar="group-name")
 
-    p_del = sub.add_parser("delete", help="删除账号组")
-    p_del.add_argument("name", metavar="账号组名称")
+    p_del = sub.add_parser("delete", help="delete an account group")
+    p_del.add_argument("name", metavar="group-name")
 
-    p_login = sub.add_parser("login", help="打开浏览器登录指定平台，关闭窗口后自动保存 Session")
-    p_login.add_argument("name", metavar="账号组名称")
-    p_login.add_argument("platform", choices=PLATFORMS, metavar="平台", help=f"可选：{', '.join(PLATFORMS)}")
+    p_login = sub.add_parser("login", help="open browser to log in; session saved automatically on close")
+    p_login.add_argument("name", metavar="group-name")
+    p_login.add_argument("platform", choices=PLATFORMS, metavar="platform", help=f"one of: {', '.join(PLATFORMS)}")
 
-    p_status = sub.add_parser("status", help="检查登录状态（exit 0=已登录，exit 1=未登录）")
-    p_status.add_argument("name", metavar="账号组名称")
-    p_status.add_argument("platform", choices=PLATFORMS, metavar="平台", help=f"可选：{', '.join(PLATFORMS)}")
+    p_status = sub.add_parser("status", help="check login status (exit 0=logged in, exit 1=not logged in)")
+    p_status.add_argument("name", metavar="group-name")
+    p_status.add_argument("platform", choices=PLATFORMS, metavar="platform", help=f"one of: {', '.join(PLATFORMS)}")
 
     args = parser.parse_args()
 
