@@ -73,7 +73,7 @@ platform 可选：`douyin` `xhs` `shipinhao` `threads` `ins`
 ### vp-publish-douyin — 抖音
 
 ```bash
-python skills/vp-publish-douyin/publish_douyin.py \
+uv run python skills/vp-publish-douyin/publish_douyin.py \
   --file <视频路径> --title <标题> --description <正文> \
   --tags "<标签>" --group "<账号组>"
 ```
@@ -81,7 +81,7 @@ python skills/vp-publish-douyin/publish_douyin.py \
 ### vp-publish-xhs — 小红书
 
 ```bash
-python skills/vp-publish-xhs/publish_xhs.py \
+uv run python skills/vp-publish-xhs/publish_xhs.py \
   --file <文件路径> --title <标题> --group "<账号组>"
 ```
 
@@ -90,7 +90,7 @@ python skills/vp-publish-xhs/publish_xhs.py \
 ### vp-publish-shipinhao — 微信视频号
 
 ```bash
-python skills/vp-publish-shipinhao/publish_shipinhao.py \
+uv run python skills/vp-publish-shipinhao/publish_shipinhao.py \
   --file <视频路径> --title <标题> --group "<账号组>"
 ```
 
@@ -99,7 +99,7 @@ python skills/vp-publish-shipinhao/publish_shipinhao.py \
 ### vp-publish-threads — Threads
 
 ```bash
-python skills/vp-publish-threads/publish_threads.py \
+uv run python skills/vp-publish-threads/publish_threads.py \
   --title <正文> [--file <媒体路径>] --group "<账号组>"
 ```
 
@@ -108,7 +108,7 @@ python skills/vp-publish-threads/publish_threads.py \
 ### vp-publish-ins — Instagram
 
 ```bash
-python skills/vp-publish-ins/publish_ins.py \
+uv run python skills/vp-publish-ins/publish_ins.py \
   --file <图片/视频路径> --title <Caption> --group "<账号组>"
 ```
 
@@ -124,16 +124,16 @@ uv sync
 uv run playwright install chromium
 
 # 2. 创建账号组
-python skills/vp-accounts/vp_accounts.py add "A组"
+uv run python skills/vp-accounts/vp_accounts.py add "A组"
 
 # 3. 登录各平台（各平台分别执行）
-python skills/vp-accounts/vp_accounts.py login "A组" douyin
+uv run python skills/vp-accounts/vp_accounts.py login "A组" douyin
 
 # 4. 确认登录状态
-python skills/vp-accounts/vp_accounts.py list
+uv run python skills/vp-accounts/vp_accounts.py list
 
 # 5. 发布内容
-python skills/vp-publish-douyin/publish_douyin.py \
+uv run python skills/vp-publish-douyin/publish_douyin.py \
   --file /path/to/video.mp4 --title "标题" --group "A组"
 ```
 
