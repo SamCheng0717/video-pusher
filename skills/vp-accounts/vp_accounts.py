@@ -162,24 +162,29 @@ def cmd_status(group_name, platform):
 # ── 入口 ────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(prog="vp_accounts")
-    sub = parser.add_subparsers(dest="cmd", required=True)
+    parser = argparse.ArgumentParser(
+        prog="vp_accounts",
+        description="多平台发布账号组管理工具",
+        epilog="示例：\n  %(prog)s add \"A组\"\n  %(prog)s login \"A组\" douyin\n  %(prog)s list",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    sub = parser.add_subparsers(dest="cmd", required=True, metavar="命令")
 
-    sub.add_parser("list")
+    sub.add_parser("list", help="列出所有账号组及各平台登录状态")
 
-    p_add = sub.add_parser("add")
-    p_add.add_argument("name")
+    p_add = sub.add_parser("add", help="创建新账号组")
+    p_add.add_argument("name", metavar="账号组名称")
 
-    p_del = sub.add_parser("delete")
-    p_del.add_argument("name")
+    p_del = sub.add_parser("delete", help="删除账号组")
+    p_del.add_argument("name", metavar="账号组名称")
 
-    p_login = sub.add_parser("login")
-    p_login.add_argument("name")
-    p_login.add_argument("platform", choices=PLATFORMS)
+    p_login = sub.add_parser("login", help="打开浏览器登录指定平台，关闭窗口后自动保存 Session")
+    p_login.add_argument("name", metavar="账号组名称")
+    p_login.add_argument("platform", choices=PLATFORMS, metavar="平台", help=f"可选：{', '.join(PLATFORMS)}")
 
-    p_status = sub.add_parser("status")
-    p_status.add_argument("name")
-    p_status.add_argument("platform", choices=PLATFORMS)
+    p_status = sub.add_parser("status", help="检查登录状态（exit 0=已登录，exit 1=未登录）")
+    p_status.add_argument("name", metavar="账号组名称")
+    p_status.add_argument("platform", choices=PLATFORMS, metavar="平台", help=f"可选：{', '.join(PLATFORMS)}")
 
     args = parser.parse_args()
 

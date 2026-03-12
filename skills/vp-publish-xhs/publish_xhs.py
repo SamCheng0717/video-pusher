@@ -110,11 +110,15 @@ def publish(file_path, title, description, tags, group):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="小红书自动发布")
-    parser.add_argument("--file",        required=True)
-    parser.add_argument("--title",       required=True)
-    parser.add_argument("--description", default="")
-    parser.add_argument("--tags",        default="")
-    parser.add_argument("--group",       required=True)
+    parser = argparse.ArgumentParser(
+        description="小红书自动发布 —— 自动打开浏览器上传视频/图片并填写内容，需手动点击发布",
+        epilog="示例：\n  %(prog)s --file video.mp4 --title \"标题\" --group \"A组\"",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--file",        required=True,  help="视频或图片文件路径（mp4/mov/jpg/png），必填")
+    parser.add_argument("--title",       required=True,  help="标题，必填")
+    parser.add_argument("--description", default="",     help="正文内容，选填")
+    parser.add_argument("--tags",        default="",     help="标签，空格分隔，自动添加 # 前缀，选填")
+    parser.add_argument("--group",       required=True,  help="账号组名称，必须已通过 vp-accounts 完成登录")
     args = parser.parse_args()
     publish(args.file, args.title, args.description, args.tags, args.group)
