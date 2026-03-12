@@ -63,31 +63,31 @@ uv run playwright install chromium
 ### 1. 创建账号组
 
 ```bash
-python skills/vp-accounts/vp_accounts.py add "A组"
+uv run python skills/vp-accounts/vp_accounts.py add "A组"
 ```
 
 ### 2. 登录各平台
 
 ```bash
 # 浏览器打开登录页，完成登录后关闭窗口即自动保存
-python skills/vp-accounts/vp_accounts.py login "A组" douyin
-python skills/vp-accounts/vp_accounts.py login "A组" xhs
-python skills/vp-accounts/vp_accounts.py login "A组" shipinhao
-python skills/vp-accounts/vp_accounts.py login "A组" threads
-python skills/vp-accounts/vp_accounts.py login "A组" ins
+uv run python skills/vp-accounts/vp_accounts.py login "A组" douyin
+uv run python skills/vp-accounts/vp_accounts.py login "A组" xhs
+uv run python skills/vp-accounts/vp_accounts.py login "A组" shipinhao
+uv run python skills/vp-accounts/vp_accounts.py login "A组" threads
+uv run python skills/vp-accounts/vp_accounts.py login "A组" ins
 ```
 
 ### 3. 确认登录状态
 
 ```bash
-python skills/vp-accounts/vp_accounts.py list
+uv run python skills/vp-accounts/vp_accounts.py list
 ```
 
 ### 4. 发布内容
 
 ```bash
 # 发布到抖音
-python skills/vp-publish-douyin/publish_douyin.py \
+uv run python skills/vp-publish-douyin/publish_douyin.py \
   --file /path/to/video.mp4 \
   --title "标题" \
   --description "正文" \
@@ -95,25 +95,25 @@ python skills/vp-publish-douyin/publish_douyin.py \
   --group "A组"
 
 # 发布到小红书（视频自动切换到视频模式）
-python skills/vp-publish-xhs/publish_xhs.py \
+uv run python skills/vp-publish-xhs/publish_xhs.py \
   --file /path/to/video.mp4 \
   --title "标题" \
   --group "A组"
 
 # 发布到视频号（无独立标题字段，标题拼入正文开头）
-python skills/vp-publish-shipinhao/publish_shipinhao.py \
+uv run python skills/vp-publish-shipinhao/publish_shipinhao.py \
   --file /path/to/video.mp4 \
   --title "标题" \
   --group "A组"
 
 # 发布到 Threads（--file 可选，支持纯文字）
-python skills/vp-publish-threads/publish_threads.py \
+uv run python skills/vp-publish-threads/publish_threads.py \
   --title "正文内容" \
   --tags "医美 玻尿酸" \
   --group "A组"
 
 # 发布到 Instagram
-python skills/vp-publish-ins/publish_ins.py \
+uv run python skills/vp-publish-ins/publish_ins.py \
   --file /path/to/photo.jpg \
   --title "Caption 内容" \
   --group "A组"
