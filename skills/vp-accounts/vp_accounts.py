@@ -65,3 +65,88 @@ def clear_singleton_locks(profile_dir):
         lp = os.path.join(profile_dir, lock)
         if os.path.exists(lp):
             os.remove(lp)
+
+
+# ── CLI 命令实现 ────────────────────────────────────────────
+
+def cmd_list():
+    accounts = load_accounts()
+    output = []
+    for g in accounts:
+        platforms_status = {p: p in g.get("platforms", {}) for p in PLATFORMS}
+        output.append({"name": g["name"], "platforms": platforms_status})
+    print(json.dumps(output, ensure_ascii=False, indent=2))
+
+def cmd_add(name):
+    accounts = load_accounts()
+    if any(g["name"] == name for g in accounts):
+        print(f"错误：账号组「{name}」已存在", file=sys.stderr)
+        sys.exit(1)
+    accounts.append({"name": name, "platforms": {}})
+    save_accounts(accounts)
+    print(f"✅ 账号组「{name}」已创建")
+
+def cmd_delete(name):
+    accounts = load_accounts()
+    new = [g for g in accounts if g["name"] != name]
+    if len(new) == len(accounts):
+        print(f"错误：账号组「{name}」不存在", file=sys.stderr)
+        sys.exit(1)
+    save_accounts(new)
+    print(f"✅ 账号组「{name}」已删除")
+
+def cmd_status(group_name, platform):
+    if platform not in PLATFORMS:
+        print(f"错误：不支持的平台 {platform}，可选：{PLATFORMS}", file=sys.stderr)
+        sys.exit(1)
+    accounts = load_accounts()
+    group = next((g for g in accounts if g["name"] == group_name), None)
+    if group is None:
+        print(f"错误：账号组「{group_name}」不存在", file=sys.stderr)
+        sys.exit(1)
+    # 两步验证：1. accounts.json 中有此平台 key；2. profile 目录存在
+    subpath = group.get("platforms", {}).get(platform)
+    if not subpath:
+        sys.exit(1)
+    profile_dir = os.path.join(PROFILE_BASE, subpath)
+    if not os.path.isdir(profile_dir):
+        sys.exit(1)
+    sys.exit(0)
+
+# ── 入口 ────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(prog="vp_accounts")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser("list")
+
+    p_add = sub.add_parser("add")
+    p_add.add_argument("name")
+
+    p_del = sub.add_parser("delete")
+    p_del.add_argument("name")
+
+    p_login = sub.add_parser("login")
+    p_login.add_argument("name")
+    p_login.add_argument("platform", choices=PLATFORMS)
+
+    p_status = sub.add_parser("status")
+    p_status.add_argument("name")
+    p_status.add_argument("platform", choices=PLATFORMS)
+
+    args = parser.parse_args()
+
+    if args.cmd == "list":
+        cmd_list()
+    elif args.cmd == "add":
+        cmd_add(args.name)
+    elif args.cmd == "delete":
+        cmd_delete(args.name)
+    elif args.cmd == "login":
+        cmd_login(args.name, args.platform)
+    elif args.cmd == "status":
+        cmd_status(args.name, args.platform)
+
+if __name__ == "__main__":
+    main()
