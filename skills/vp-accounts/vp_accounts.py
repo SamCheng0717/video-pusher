@@ -95,6 +95,52 @@ def cmd_delete(name):
     save_accounts(new)
     print(f"✅ 账号组「{name}」已删除")
 
+def cmd_login(group_name, platform):
+    from playwright.sync_api import sync_playwright
+
+    accounts = load_accounts()
+    group = next((g for g in accounts if g["name"] == group_name), None)
+    if group is None:
+        print(f"错误：账号组「{group_name}」不存在，请先用 add 命令创建", file=sys.stderr)
+        sys.exit(1)
+
+    subpath = get_profile_subpath(accounts, group_name, platform)
+    profile_dir = os.path.join(PROFILE_BASE, subpath)
+    os.makedirs(profile_dir, exist_ok=True)
+    clear_singleton_locks(profile_dir)
+
+    url = PLATFORM_URLS[platform]
+    platform_names = {
+        "douyin": "抖音", "xhs": "小红书", "shipinhao": "视频号",
+        "threads": "Threads", "ins": "Instagram",
+    }
+    print(f"\n正在打开 {platform_names[platform]} 登录页面…")
+    print("请在浏览器中完成登录，登录成功后关闭浏览器窗口。\n")
+
+    with sync_playwright() as p:
+        context = p.chromium.launch_persistent_context(
+            user_data_dir=profile_dir,
+            headless=False,
+            args=["--start-maximized", "--disable-blink-features=AutomationControlled"],
+            ignore_default_args=["--enable-automation"],
+            no_viewport=True,
+        )
+        page = context.new_page()
+        page.add_init_script(
+            "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
+        )
+        page.goto(url)
+        try:
+            context.wait_for_event("close", timeout=0)  # 无超时，等用户关闭浏览器
+        except Exception:
+            pass
+
+    # 浏览器已关闭，写回 accounts.json
+    group.setdefault("platforms", {})[platform] = subpath
+    save_accounts(accounts)
+    print(f"✅ {platform_names[platform]} 登录完成，Session 已保存至 {profile_dir}")
+
+
 def cmd_status(group_name, platform):
     if platform not in PLATFORMS:
         print(f"错误：不支持的平台 {platform}，可选：{PLATFORMS}", file=sys.stderr)
