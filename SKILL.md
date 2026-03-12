@@ -14,6 +14,7 @@ metadata:
     os:
       - darwin
       - linux
+      - Mac OS X
 ---
 
 # 多平台视频发布 Skills
