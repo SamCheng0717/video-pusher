@@ -1,8 +1,50 @@
 # Video Pusher Skills
 
-一组 Claude Code skills，将视频/图文内容一键发布到多个社交平台。
+一组 Claude Code / OpenClaw skills，将视频/图文内容一键发布到多个社交平台。
 
 支持平台：**抖音、小红书、微信视频号、Threads、Instagram**
+
+## 安装
+
+### Claude Code
+
+```bash
+# 克隆仓库到项目的 skills 目录
+git clone https://github.com/your-username/video-pusher skills/video-pusher
+
+# 或直接克隆到工作目录后使用
+git clone https://github.com/your-username/video-pusher
+cd video-pusher
+```
+
+安装 Python 依赖：
+
+```bash
+uv sync
+```
+
+> **首次使用必须运行：**
+> ```bash
+> uv run playwright install chromium
+> ```
+> 这会下载 Chromium 内核（约 150MB），只需执行一次。
+
+### OpenClaw / ClawHub
+
+```bash
+# 安装全部 skills
+clawhub install your-username/video-pusher
+
+# 或单独安装某个 skill
+clawhub install your-username/vp-accounts
+clawhub install your-username/vp-publish
+```
+
+安装后同样需要安装 Chromium：
+
+```bash
+uv run playwright install chromium
+```
 
 ## Skills
 
@@ -15,16 +57,6 @@
 | `vp-publish-shipinhao` | 发布到微信视频号 |
 | `vp-publish-threads` | 发布到 Threads（支持纯文字） |
 | `vp-publish-ins` | 发布到 Instagram |
-
-## 安装
-
-```bash
-# 安装 Python 依赖
-uv sync
-
-# 安装 Chromium 浏览器
-uv run playwright install chromium
-```
 
 ## 快速开始
 
