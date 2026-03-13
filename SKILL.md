@@ -33,7 +33,7 @@ metadata:
 
 1. **账号管理**（"添加账号 / 删除账号 / 查看账号 / 列出账号"）→ 执行 `vp-accounts` 技能。
 2. **登录**（"登录 / 重新登录 / login"）→ 执行 `vp-accounts` 技能的 login 命令。
-3. **登录状态**（"是否登录 / 检查登录 / status"）→ 执行 `vp-accounts` 技能的 status 命令。
+3. **登录状态**（"是否登录 / 检查登录 / 查看所有账号 / status / list"）→ 执行 `vp-accounts` 技能的 `list` 或 `status` 命令。
 4. **多平台发布**（"同时发布到多个平台 / 一键发布"）→ 执行 `vp-publish` 技能。
 5. **抖音发布**（"发布到抖音 / 抖音"）→ 执行 `vp-publish-douyin` 技能。
 6. **小红书发布**（"发布到小红书 / 小红书 / xhs"）→ 执行 `vp-publish-xhs` 技能。
@@ -63,6 +63,7 @@ metadata:
 | `vp_accounts.py delete "组名"` | 删除账号组 |
 | `vp_accounts.py login "组名" <platform>` | 打开浏览器登录，关闭后自动保存 Session |
 | `vp_accounts.py status "组名" <platform>` | 检查登录状态（exit 0=已登录） |
+| `vp_accounts.py remove "组名" <platform>` | 删除某平台登录状态并清除本地 Profile |
 
 platform 可选：`douyin` `xhs` `shipinhao` `threads` `ins`
 

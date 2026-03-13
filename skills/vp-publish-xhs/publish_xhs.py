@@ -107,6 +107,7 @@ def publish(file_path, title, description, tags, group):
                     desc_area.type(tag, delay=30)
                     time.sleep(0.5)
                     page.keyboard.press("Escape")
+                    time.sleep(0.3)
                     desc_area.type(" ", delay=30)
         except Exception:
             print("⚠️  正文请手动填写")

@@ -50,57 +50,88 @@ def publish(file_path, title, description, tags, group):
             ignore_default_args=["--enable-automation"],
             no_viewport=True,
         )
-        page = context.new_page()
-        page.add_init_script(
-            "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
-        )
-        page.goto("https://www.threads.com/")
-        page.wait_for_load_state("domcontentloaded")
-        time.sleep(2)
-
-        if "login" in page.url or page.locator('input[name="username"]').count() > 0:
-            print("⚠️  请在浏览器中完成 Threads 登录...")
-            page.wait_for_url("https://www.threads.com/", timeout=120000)
-            time.sleep(3)
-
-        # 点击首页的发帖输入框（同时也是文字输入区）
-        compose_sel = '[aria-label="Empty text field. Type to compose a new post."]'
         try:
-            page.wait_for_selector(compose_sel, timeout=15000)
-            page.locator(compose_sel).first.click()
-            time.sleep(1)
-        except Exception:
-            print("⚠️  请手动点击发帖输入框")
+            page = context.new_page()
+            page.add_init_script(
+                "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
+            )
+            page.goto("https://www.threads.com/")
+            page.wait_for_load_state("domcontentloaded")
+            time.sleep(2)
 
-        # 上传媒体（可选）
-        if file_path:
+            if "login" in page.url or page.locator('input[name="username"]').count() > 0:
+                print("⚠️  请在浏览器中完成 Threads 登录...")
+                page.wait_for_url("https://www.threads.com/", timeout=120000)
+                time.sleep(3)
+
+            # 打开发帖弹窗：先尝试导航栏"创建"按钮，再试首页文本框
+            compose_btn_sel = (
+                '[aria-label="创建"], [aria-label="Create"], '
+                '[aria-label="New thread"], [aria-label="发帖"], '
+                'a[href="/new-post"]'
+            )
+            compose_input_sel = (
+                '[aria-label="文本栏为空白。请输入内容，撰写新帖子。"], '
+                '[aria-label="Empty text field. Type to compose a new post."]'
+            )
             try:
-                page.wait_for_selector('input[type="file"]', timeout=15000, state="attached")
-                page.locator('input[type="file"]').first.set_input_files(file_path)
-                print(f"📤 文件已上传：{os.path.basename(file_path)}")
-                time.sleep(4)
+                page.wait_for_selector(compose_btn_sel, timeout=10000)
+                page.locator(compose_btn_sel).first.click()
+                time.sleep(1)
             except Exception:
-                print("⚠️  请手动上传文件")
+                try:
+                    page.wait_for_selector(compose_input_sel, timeout=10000)
+                    page.locator(compose_input_sel).first.click()
+                    time.sleep(1)
+                except Exception:
+                    print("⚠️  请手动点击发帖输入框")
 
-        # 填写文案
-        try:
-            text_area = page.locator(compose_sel).first
-            text_area.click()
-            full_text = title
-            if description:
-                full_text += "\n" + description
-            tag_str = format_tags(tags)
-            if tag_str:
-                full_text += "\n" + tag_str
-            text_area.type(full_text, delay=30)
-            print("✏️  文案已填写")
-        except Exception:
-            print("⚠️  文案请手动填写")
+            # 填写文案（先填文字，与原版一致）
+            try:
+                text_sel = 'div[contenteditable="true"], textarea[placeholder]'
+                page.wait_for_selector(text_sel, timeout=15000)
+                text_area = page.locator(text_sel).first
+                text_area.click()
+                full_text = title
+                if description:
+                    full_text += "\n" + description
+                tag_str = format_tags(tags)
+                if tag_str:
+                    full_text += "\n" + tag_str
+                text_area.type(full_text, delay=30)
+                print("✏️  文案已填写")
+            except Exception:
+                print("⚠️  文案请手动填写")
 
-        print("\n✅ 内容填写完毕！请检查后点击【发帖】按钮")
-        print("Close the browser window when done.")
-        try:
-            page.wait_for_event("close", timeout=0)
+            # 上传媒体（可选）：先尝试点击媒体按钮触发 file input
+            if file_path:
+                try:
+                    media_btn_sel = (
+                        '[aria-label*="photo"], [aria-label*="图片"], '
+                        '[aria-label*="video"], [aria-label*="视频"], '
+                        '[aria-label*="media"], [aria-label*="媒体"], '
+                        '[aria-label*="Add"], [aria-label*="添加"]'
+                    )
+                    try:
+                        upload_btn = page.locator(media_btn_sel).first
+                        if upload_btn.is_visible():
+                            upload_btn.click()
+                            time.sleep(1)
+                    except Exception:
+                        pass
+                    page.wait_for_selector('input[type="file"]', timeout=10000, state="attached")
+                    page.locator('input[type="file"]').first.set_input_files(file_path)
+                    print(f"📤 文件已上传：{os.path.basename(file_path)}")
+                    time.sleep(4)
+                except Exception:
+                    print("⚠️  请手动上传文件")
+
+            print("\n✅ 内容填写完毕！请检查后点击【发帖】按钮")
+            print("Close the browser window when done.")
+            try:
+                page.wait_for_event("close", timeout=0)
+            except Exception:
+                pass
         except Exception:
             pass
 

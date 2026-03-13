@@ -50,75 +50,78 @@ def publish(file_path, title, description, tags, group):
             ignore_default_args=["--enable-automation"],
             no_viewport=True,
         )
-        page = context.new_page()
-        page.add_init_script(
-            "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
-        )
-        page.goto("https://www.instagram.com/")
-        page.wait_for_load_state("networkidle")
-        time.sleep(2)
-
-        if "accounts/login" in page.url or page.locator('input[name="username"]').count() > 0:
-            print("⚠️  请在浏览器中完成 Instagram 登录...")
-            page.wait_for_url("https://www.instagram.com/", timeout=120000)
-            time.sleep(3)
-
-        # 点击「创建」按钮
         try:
-            create_sel = '[aria-label="New post"], [aria-label="创建"], svg[aria-label="New post"]'
-            page.wait_for_selector(create_sel, timeout=15000)
-            page.locator(create_sel).first.click()
-            time.sleep(1)
-        except Exception:
-            print("⚠️  请手动点击「创建」(+) 按钮")
-
-        # 上传文件（可选）
-        if file_path:
-            try:
-                page.wait_for_selector('input[type="file"]', timeout=15000, state="attached")
-                page.locator('input[type="file"]').first.set_input_files(file_path)
-                print(f"📤 文件已上传：{os.path.basename(file_path)}")
-                time.sleep(4)
-            except Exception:
-                print("⚠️  请手动选择文件")
-
-            # 多步骤：裁剪 → 滤镜 → Caption
-            for step_label in ["Next", "下一步", "OK"]:
-                try:
-                    btn = page.locator(
-                        f'button:has-text("{step_label}"), [aria-label="{step_label}"]'
-                    ).first
-                    if btn.is_visible():
-                        btn.click()
-                        time.sleep(2)
-                except Exception:
-                    pass
-
-        # 填写 Caption（title 作开头）
-        try:
-            caption_sel = (
-                'textarea[aria-label*="caption"], textarea[placeholder*="caption"], '
-                'div[aria-label*="caption"], textarea[placeholder*="Write"]'
+            page = context.new_page()
+            page.add_init_script(
+                "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
             )
-            page.wait_for_selector(caption_sel, timeout=20000)
-            caption_area = page.locator(caption_sel).first
-            caption_area.click()
-            time.sleep(0.5)
-            full_text = title
-            if description:
-                full_text += "\n" + description
-            tag_str = format_tags(tags)
-            if tag_str:
-                full_text += "\n" + tag_str
-            caption_area.type(full_text, delay=30)
-            print("✏️  Caption 已填写")
-        except Exception:
-            print("⚠️  Caption 请手动填写")
+            page.goto("https://www.instagram.com/")
+            page.wait_for_load_state("domcontentloaded")
+            time.sleep(2)
 
-        print("\n✅ 内容填写完毕！请检查后点击【分享 / Share】按钮")
-        print("Close the browser window when done.")
-        try:
-            page.wait_for_event("close", timeout=0)
+            if "accounts/login" in page.url or page.locator('input[name="username"]').count() > 0:
+                print("⚠️  请在浏览器中完成 Instagram 登录...")
+                page.wait_for_url("https://www.instagram.com/", timeout=120000)
+                time.sleep(3)
+
+            # 点击「创建」按钮
+            try:
+                create_sel = '[aria-label="新帖子"], [aria-label="New post"], [aria-label="创建"]'
+                page.wait_for_selector(create_sel, timeout=15000)
+                page.locator(create_sel).first.click()
+                time.sleep(1)
+            except Exception:
+                print("⚠️  请手动点击「创建」(+) 按钮")
+
+            # 上传文件（可选）
+            if file_path:
+                try:
+                    page.wait_for_selector('input[type="file"]', timeout=15000, state="attached")
+                    page.locator('input[type="file"]').first.set_input_files(file_path)
+                    print(f"📤 文件已上传：{os.path.basename(file_path)}")
+                    time.sleep(4)
+                except Exception:
+                    print("⚠️  请手动选择文件")
+
+                # 多步骤：裁剪 → 滤镜 → Caption
+                for step_label in ["Next", "下一步", "OK"]:
+                    try:
+                        btn = page.locator(
+                            f'button:has-text("{step_label}"), [aria-label="{step_label}"]'
+                        ).first
+                        if btn.is_visible():
+                            btn.click()
+                            time.sleep(2)
+                    except Exception:
+                        pass
+
+            # 填写 Caption（title 作开头）
+            try:
+                caption_sel = (
+                    'textarea[aria-label*="caption"], textarea[placeholder*="caption"], '
+                    'div[aria-label*="caption"], textarea[placeholder*="Write"]'
+                )
+                page.wait_for_selector(caption_sel, timeout=20000)
+                caption_area = page.locator(caption_sel).first
+                caption_area.click()
+                time.sleep(0.5)
+                full_text = title
+                if description:
+                    full_text += "\n" + description
+                tag_str = format_tags(tags)
+                if tag_str:
+                    full_text += "\n" + tag_str
+                caption_area.type(full_text, delay=30)
+                print("✏️  Caption 已填写")
+            except Exception:
+                print("⚠️  Caption 请手动填写")
+
+            print("\n✅ 内容填写完毕！请检查后点击【分享 / Share】按钮")
+            print("Close the browser window when done.")
+            try:
+                page.wait_for_event("close", timeout=0)
+            except Exception:
+                pass
         except Exception:
             pass
 

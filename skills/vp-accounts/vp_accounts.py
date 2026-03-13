@@ -148,7 +148,8 @@ def cmd_login(group_name, platform):
         )
         try:
             page.goto(url)
-            page.wait_for_load_state("networkidle")
+            page.wait_for_load_state("domcontentloaded")
+            time.sleep(2)
 
             if platform in _ALREADY_LOGGED_IN_SELECTOR:
                 selector = _ALREADY_LOGGED_IN_SELECTOR[platform]
@@ -157,19 +158,20 @@ def cmd_login(group_name, platform):
                     page.wait_for_selector(selector, timeout=3000)
                     print(f"✅ Already logged in to {name}. Close the browser to continue.")
                 except Exception:
-                    # Login screen is showing — wait for the user to log in
                     print(f"Log in to {name} in the browser.\n")
-                    try:
-                        if platform in _POST_LOGIN_URL:
+                    # Douyin: detect login via URL change; others: just wait for close
+                    if platform in _POST_LOGIN_URL:
+                        try:
                             page.wait_for_url(_POST_LOGIN_URL[platform], timeout=294_000)
-                        else:
-                            page.wait_for_selector(selector, timeout=294_000)
-                        print(f"✅ Login successful! Close the browser to save session.")
-                    except Exception:
-                        pass  # browser closed manually before detection
+                            print(f"✅ Login successful! Close the browser to save session.")
+                        except Exception:
+                            pass
+                    else:
+                        print("Close the browser window when done.")
             else:
                 # Threads / Instagram: manual close
                 print(f"Log in to {name} in the browser.\n")
+                print("Close the browser window when done.")
 
             # All platforms: wait for user to close the window (macOS X button
             # closes the page, not the full context, so listen to page close)

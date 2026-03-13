@@ -51,48 +51,68 @@ def publish(file_path, title, description, tags, group):
             ignore_default_args=["--enable-automation"],
             no_viewport=True,
         )
-        page = context.new_page()
-        page.add_init_script(
-            "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
-        )
-        page.goto("https://channels.weixin.qq.com/platform/post/create")
-        page.wait_for_load_state("networkidle")
-
-        if "login" in page.url or page.locator('canvas').count() > 0:
-            print("⚠️  请用微信扫描浏览器中的二维码登录...")
-            page.wait_for_url("**/platform/**", timeout=120000)
+        try:
+            page = context.new_page()
+            page.add_init_script(
+                "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
+            )
+            page.goto("https://channels.weixin.qq.com/platform/post/create")
+            page.wait_for_load_state("domcontentloaded")
             time.sleep(2)
 
-        try:
-            page.wait_for_selector('input[type="file"]', timeout=30000, state="attached")
-            print(f"📤 正在上传：{os.path.basename(file_path)}")
-            page.locator('input[type="file"]').first.set_input_files(file_path)
-        except Exception:
-            print("⚠️  请手动点击上传按钮选择文件")
+            if "login" in page.url or page.locator('canvas').count() > 0:
+                print("⚠️  请用微信扫描浏览器中的二维码登录...")
+                page.wait_for_url("**/platform/**", timeout=120000)
+                time.sleep(2)
 
-        time.sleep(10)
+            try:
+                page.wait_for_selector('input[type="file"]', timeout=30000, state="attached")
+                print(f"📤 正在上传：{os.path.basename(file_path)}")
+                page.locator('input[type="file"]').first.set_input_files(file_path)
+            except Exception:
+                print("⚠️  请手动点击上传按钮选择文件")
 
-        try:
-            desc_sel = 'textarea, div[contenteditable="true"]'
-            desc_area = page.locator(desc_sel).first
-            desc_area.click()
-            time.sleep(0.5)
-            # 视频号无独立标题字段：标题拼入正文开头
-            full_text = title
-            if description:
-                full_text += "\n" + description
-            tag_str = format_tags(tags)
-            if tag_str:
-                full_text += "\n" + tag_str
-            desc_area.fill("")          # 先清空，防止残留内容
-            desc_area.type(full_text, delay=30)
-        except Exception:
-            print("⚠️  内容请手动填写")
+            # 等待短标题字段出现（视频处理需要一定时间）
+            title_sel = 'input[placeholder*="概括视频主要内容"]'
+            try:
+                page.wait_for_selector(title_sel, timeout=60000)
+            except Exception:
+                pass
 
-        print("\n✅ 内容填写完毕！请检查后点击【发表】按钮")
-        print("Close the browser window when done.")
-        try:
-            page.wait_for_event("close", timeout=0)
+            # 填写短标题
+            try:
+                ti = page.locator(title_sel).first
+                ti.click()
+                ti.fill(title)
+                print("✏️  短标题已填写")
+            except Exception:
+                print("⚠️  短标题请手动填写")
+
+            # 填写视频描述
+            try:
+                desc_sel = 'div[contenteditable], [role="textbox"], textarea:visible'
+                page.wait_for_selector(desc_sel, timeout=10000)
+                desc_area = page.locator(desc_sel).first
+                desc_area.click()
+                time.sleep(0.5)
+                body = description or ""
+                tag_str = format_tags(tags)
+                full_text = body
+                if tag_str:
+                    full_text += ("\n" if full_text else "") + tag_str
+                if full_text:
+                    desc_area.fill("")
+                    desc_area.type(full_text, delay=30)
+                    print("✏️  描述已填写")
+            except Exception:
+                print("⚠️  描述请手动填写")
+
+            print("\n✅ 内容填写完毕！请检查后点击【发表】按钮")
+            print("Close the browser window when done.")
+            try:
+                page.wait_for_event("close", timeout=0)
+            except Exception:
+                pass
         except Exception:
             pass
 
