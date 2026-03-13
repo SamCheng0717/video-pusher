@@ -151,35 +151,30 @@ def cmd_login(group_name, platform):
 
         if platform in _ALREADY_LOGGED_IN_SELECTOR:
             selector = _ALREADY_LOGGED_IN_SELECTOR[platform]
-            # Quick probe: upload UI visible within 6 s → already logged in
+            # Quick probe: upload UI visible within 3 s → already logged in
             try:
                 page.wait_for_selector(selector, timeout=3000)
-                print(f"Already logged in to {name}.")
-                time.sleep(1)
+                print(f"✅ Already logged in to {name}. Close the browser to continue.")
             except Exception:
                 # Login screen is showing — wait for the user to log in
-                print(f"Log in to {name} in the browser.")
-                print(f"Browser will close automatically once login is detected.\n")
+                print(f"Log in to {name} in the browser.\n")
                 try:
                     if platform in _POST_LOGIN_URL:
-                        # Reliable: URL changes after login (e.g. Douyin → /home)
                         page.wait_for_url(_POST_LOGIN_URL[platform], timeout=294_000)
                     else:
-                        # Fallback: wait for upload UI to appear (XHS, Shipinhao)
                         page.wait_for_selector(selector, timeout=294_000)
-                    print(f"✅ Login detected! Closing browser...")
-                    time.sleep(2)
+                    print(f"✅ Login successful! Close the browser to save session.")
                 except Exception:
-                    pass  # browser closed manually
-            context.close()
+                    pass  # browser closed manually before detection
         else:
             # Threads / Instagram: manual close
-            print(f"Log in to {name} in the browser.")
-            print(f"Close the browser window when done — session saves automatically.\n")
-            try:
-                context.wait_for_event("close", timeout=0)
-            except Exception:
-                pass
+            print(f"Log in to {name} in the browser.\n")
+
+        # All platforms: wait for user to close the browser
+        try:
+            context.wait_for_event("close", timeout=0)
+        except Exception:
+            pass
 
     group.setdefault("platforms", {})[platform] = subpath
     save_accounts(accounts)
