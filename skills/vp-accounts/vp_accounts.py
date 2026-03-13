@@ -24,16 +24,14 @@ PLATFORM_URLS = {
 }
 PLATFORMS = list(PLATFORM_URLS.keys())
 
-# Platforms where login causes a URL redirect — we can auto-detect success
-_LOGIN_URL_INDICATORS = {
-    "douyin":    ["login", "passport"],
-    "xhs":       ["login", "sign"],
-    "shipinhao": ["login"],
-}
-_POST_LOGIN_URL = {
-    "douyin":    "**/creator-micro/**",
-    "xhs":       "**/publish/**",
-    "shipinhao": "**/platform/post/**",
+# DOM selector that appears only when logged in on the creator/publish page.
+# These platforms are SPAs — the URL never changes on login/logout, so
+# URL-based detection is unreliable.  Waiting for the file-input element
+# is the most reliable signal that the upload UI (= logged-in state) is visible.
+_LOGIN_SUCCESS_SELECTOR = {
+    "douyin":    'input[type="file"]',
+    "xhs":       'input[type="file"]',
+    "shipinhao": 'input[type="file"]',
 }
 PLATFORM_NAMES = {
     "douyin": "Douyin", "xhs": "Xiaohongshu", "shipinhao": "WeChat Channels",
@@ -145,40 +143,26 @@ def cmd_login(group_name, platform):
         page.goto(url)
         page.wait_for_load_state("networkidle")
 
-        if platform in _LOGIN_URL_INDICATORS:
-            import json as _json
-            indicators = _LOGIN_URL_INDICATORS[platform]
-            # Some platforms (e.g. Douyin) load the creator URL first, then
-            # JS checks auth and redirects to a login page.  A fixed sleep is
-            # unreliable — instead, actively wait up to 5 s to see whether a
-            # login-page redirect actually happens.
-            js_indicators = _json.dumps(indicators)
+        if platform in _LOGIN_SUCCESS_SELECTOR:
+            selector = _LOGIN_SUCCESS_SELECTOR[platform]
+            # Quick probe: if the upload UI is already visible, already logged in
             try:
-                page.wait_for_function(
-                    f"() => {js_indicators}.some(s => location.href.includes(s))",
-                    timeout=5000,
-                )
-                on_login_page = True
+                page.wait_for_selector(selector, timeout=6000)
+                print(f"Already logged in to {name}.")
+                time.sleep(1)
             except Exception:
-                # No redirect to a login page within 5 s → check current URL
-                on_login_page = any(ind in page.url for ind in indicators)
-
-            if on_login_page:
+                # Upload UI not visible yet → login screen is showing
                 print(f"Log in to {name} in the browser.")
                 print(f"Browser will close automatically once login is detected.\n")
                 try:
-                    page.wait_for_url(_POST_LOGIN_URL[platform], timeout=300_000)
+                    page.wait_for_selector(selector, timeout=294_000)
                     print(f"✅ Login detected! Closing browser...")
                     time.sleep(2)
-                    context.close()
                 except Exception:
-                    pass  # browser closed manually before detection
-            else:
-                print(f"Already logged in to {name}.")
-                time.sleep(1)
-                context.close()
+                    pass  # browser closed manually
+            context.close()
         else:
-            # Threads / Instagram: login is inline, URL doesn't change clearly
+            # Threads / Instagram: manual close
             print(f"Log in to {name} in the browser.")
             print(f"Close the browser window when done — session saves automatically.\n")
             try:
