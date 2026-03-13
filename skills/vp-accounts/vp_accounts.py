@@ -177,6 +177,25 @@ def cmd_login(group_name, platform):
     print(f"✅ {name} session saved to {profile_dir}")
 
 
+def cmd_remove_platform(group_name, platform):
+    import shutil
+    accounts = load_accounts()
+    group = next((g for g in accounts if g["name"] == group_name), None)
+    if group is None:
+        print(f"Error: account group '{group_name}' not found.", file=sys.stderr)
+        sys.exit(1)
+    subpath = group.get("platforms", {}).pop(platform, None)
+    if subpath is None:
+        print(f"Error: '{platform}' is not logged in under group '{group_name}'.", file=sys.stderr)
+        sys.exit(1)
+    save_accounts(accounts)
+    # Remove the profile directory for this platform
+    profile_dir = os.path.join(PROFILE_BASE, subpath)
+    if os.path.isdir(profile_dir):
+        shutil.rmtree(profile_dir)
+    print(f"✅ {PLATFORM_NAMES[platform]} removed from group '{group_name}'.")
+
+
 def cmd_status(group_name, platform):
     if platform not in PLATFORMS:
         print(f"Error: unsupported platform '{platform}'. Choose from: {PLATFORMS}", file=sys.stderr)
@@ -222,6 +241,10 @@ def main():
     p_status.add_argument("name", metavar="group-name")
     p_status.add_argument("platform", choices=PLATFORMS, metavar="platform", help=f"one of: {', '.join(PLATFORMS)}")
 
+    p_remove = sub.add_parser("remove", help="remove a platform login from an account group")
+    p_remove.add_argument("name", metavar="group-name")
+    p_remove.add_argument("platform", choices=PLATFORMS, metavar="platform", help=f"one of: {', '.join(PLATFORMS)}")
+
     args = parser.parse_args()
 
     if args.cmd == "list":
@@ -234,6 +257,8 @@ def main():
         cmd_login(args.name, args.platform)
     elif args.cmd == "status":
         cmd_status(args.name, args.platform)
+    elif args.cmd == "remove":
+        cmd_remove_platform(args.name, args.platform)
 
 if __name__ == "__main__":
     main()
