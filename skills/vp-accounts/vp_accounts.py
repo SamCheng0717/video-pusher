@@ -220,7 +220,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog="vp_accounts",
         description="Account group manager for multi-platform publishing",
-        epilog='Examples:\n  %(prog)s add "GroupA"\n  %(prog)s login "GroupA" douyin\n  %(prog)s list',
+        epilog='Examples:\n  %(prog)s add "GroupA"\n  %(prog)s login "GroupA" douyin\n  %(prog)s remove "GroupA" douyin\n  %(prog)s list',
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     sub = parser.add_subparsers(dest="cmd", required=True, metavar="command")
