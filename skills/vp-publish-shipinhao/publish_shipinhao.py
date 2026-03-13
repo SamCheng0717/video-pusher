@@ -64,7 +64,7 @@ def publish(file_path, title, description, tags, group):
             time.sleep(2)
 
         try:
-            page.wait_for_selector('input[type="file"]', timeout=30000)
+            page.wait_for_selector('input[type="file"]', timeout=30000, state="attached")
             print(f"📤 正在上传：{os.path.basename(file_path)}")
             page.locator('input[type="file"]').first.set_input_files(file_path)
         except Exception:

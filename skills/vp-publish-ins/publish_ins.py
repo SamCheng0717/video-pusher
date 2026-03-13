@@ -75,7 +75,7 @@ def publish(file_path, title, description, tags, group):
         # 上传文件（可选）
         if file_path:
             try:
-                page.wait_for_selector('input[type="file"]', timeout=15000)
+                page.wait_for_selector('input[type="file"]', timeout=15000, state="attached")
                 page.locator('input[type="file"]').first.set_input_files(file_path)
                 print(f"📤 文件已上传：{os.path.basename(file_path)}")
                 time.sleep(4)
