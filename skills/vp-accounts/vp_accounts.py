@@ -146,35 +146,35 @@ def cmd_login(group_name, platform):
         page.add_init_script(
             "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
         )
-        page.goto(url)
-        page.wait_for_load_state("networkidle")
-
-        if platform in _ALREADY_LOGGED_IN_SELECTOR:
-            selector = _ALREADY_LOGGED_IN_SELECTOR[platform]
-            # Quick probe: upload UI visible within 3 s → already logged in
-            try:
-                page.wait_for_selector(selector, timeout=3000)
-                print(f"✅ Already logged in to {name}. Close the browser to continue.")
-            except Exception:
-                # Login screen is showing — wait for the user to log in
-                print(f"Log in to {name} in the browser.\n")
-                try:
-                    if platform in _POST_LOGIN_URL:
-                        page.wait_for_url(_POST_LOGIN_URL[platform], timeout=294_000)
-                    else:
-                        page.wait_for_selector(selector, timeout=294_000)
-                    print(f"✅ Login successful! Close the browser to save session.")
-                except Exception:
-                    pass  # browser closed manually before detection
-        else:
-            # Threads / Instagram: manual close
-            print(f"Log in to {name} in the browser.\n")
-
-        # All platforms: wait for user to close the browser
         try:
+            page.goto(url)
+            page.wait_for_load_state("networkidle")
+
+            if platform in _ALREADY_LOGGED_IN_SELECTOR:
+                selector = _ALREADY_LOGGED_IN_SELECTOR[platform]
+                # Quick probe: upload UI visible within 3 s → already logged in
+                try:
+                    page.wait_for_selector(selector, timeout=3000)
+                    print(f"✅ Already logged in to {name}. Close the browser to continue.")
+                except Exception:
+                    # Login screen is showing — wait for the user to log in
+                    print(f"Log in to {name} in the browser.\n")
+                    try:
+                        if platform in _POST_LOGIN_URL:
+                            page.wait_for_url(_POST_LOGIN_URL[platform], timeout=294_000)
+                        else:
+                            page.wait_for_selector(selector, timeout=294_000)
+                        print(f"✅ Login successful! Close the browser to save session.")
+                    except Exception:
+                        pass  # browser closed manually before detection
+            else:
+                # Threads / Instagram: manual close
+                print(f"Log in to {name} in the browser.\n")
+
+            # All platforms: wait for user to close the browser
             context.wait_for_event("close", timeout=0)
         except Exception:
-            pass
+            pass  # browser closed at any point — that's fine
 
     group.setdefault("platforms", {})[platform] = subpath
     save_accounts(accounts)
