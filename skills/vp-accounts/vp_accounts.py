@@ -24,6 +24,22 @@ PLATFORM_URLS = {
 }
 PLATFORMS = list(PLATFORM_URLS.keys())
 
+# Platforms where login causes a URL redirect — we can auto-detect success
+_LOGIN_URL_INDICATORS = {
+    "douyin":    ["login", "passport"],
+    "xhs":       ["login", "sign"],
+    "shipinhao": ["login"],
+}
+_POST_LOGIN_URL = {
+    "douyin":    "**/creator-micro/**",
+    "xhs":       "**/publish/**",
+    "shipinhao": "**/platform/post/**",
+}
+PLATFORM_NAMES = {
+    "douyin": "Douyin", "xhs": "Xiaohongshu", "shipinhao": "WeChat Channels",
+    "threads": "Threads", "ins": "Instagram",
+}
+
 # ── 纯逻辑函数 ──────────────────────────────────────────────
 
 def load_accounts(path=None):
@@ -80,28 +96,29 @@ def cmd_list():
 def cmd_add(name):
     accounts = load_accounts()
     if any(g["name"] == name for g in accounts):
-        print(f"错误：账号组「{name}」已存在", file=sys.stderr)
+        print(f"Error: account group '{name}' already exists.", file=sys.stderr)
         sys.exit(1)
     accounts.append({"name": name, "platforms": {}})
     save_accounts(accounts)
-    print(f"✅ 账号组「{name}」已创建")
+    print(f"✅ Account group '{name}' created.")
 
 def cmd_delete(name):
     accounts = load_accounts()
     new = [g for g in accounts if g["name"] != name]
     if len(new) == len(accounts):
-        print(f"错误：账号组「{name}」不存在", file=sys.stderr)
+        print(f"Error: account group '{name}' not found.", file=sys.stderr)
         sys.exit(1)
     save_accounts(new)
-    print(f"✅ 账号组「{name}」已删除")
+    print(f"✅ Account group '{name}' deleted.")
 
 def cmd_login(group_name, platform):
+    import time
     from playwright.sync_api import sync_playwright
 
     accounts = load_accounts()
     group = next((g for g in accounts if g["name"] == group_name), None)
     if group is None:
-        print(f"错误：账号组「{group_name}」不存在，请先用 add 命令创建", file=sys.stderr)
+        print(f"Error: account group '{group_name}' not found. Create it first with 'add'.", file=sys.stderr)
         sys.exit(1)
 
     subpath = get_profile_subpath(accounts, group_name, platform)
@@ -110,12 +127,8 @@ def cmd_login(group_name, platform):
     clear_singleton_locks(profile_dir)
 
     url = PLATFORM_URLS[platform]
-    platform_names = {
-        "douyin": "抖音", "xhs": "小红书", "shipinhao": "视频号",
-        "threads": "Threads", "ins": "Instagram",
-    }
-    print(f"\n正在打开 {platform_names[platform]} 登录页面…")
-    print("请在浏览器中完成登录，登录成功后关闭浏览器窗口。\n")
+    name = PLATFORM_NAMES[platform]
+    print(f"\nOpening {name} login page...")
 
     with sync_playwright() as p:
         context = p.chromium.launch_persistent_context(
@@ -130,25 +143,48 @@ def cmd_login(group_name, platform):
             "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
         )
         page.goto(url)
-        try:
-            context.wait_for_event("close", timeout=0)  # 无超时，等用户关闭浏览器
-        except Exception:
-            pass
+        page.wait_for_load_state("networkidle")
+        time.sleep(2)
 
-    # 浏览器已关闭，写回 accounts.json
+        if platform in _LOGIN_URL_INDICATORS:
+            # Auto-detect: login causes a URL redirect to a known post-login URL
+            indicators = _LOGIN_URL_INDICATORS[platform]
+            if any(ind in page.url for ind in indicators):
+                print(f"Log in to {name} in the browser.")
+                print(f"Browser will close automatically once login is detected.\n")
+                try:
+                    page.wait_for_url(_POST_LOGIN_URL[platform], timeout=300_000)
+                    print(f"✅ Login detected! Closing browser...")
+                    time.sleep(2)
+                    context.close()
+                except Exception:
+                    pass  # browser closed manually before detection
+            else:
+                print(f"Already logged in to {name}.")
+                time.sleep(1)
+                context.close()
+        else:
+            # Threads / Instagram: login is inline, URL doesn't change clearly
+            print(f"Log in to {name} in the browser.")
+            print(f"Close the browser window when done — session saves automatically.\n")
+            try:
+                context.wait_for_event("close", timeout=0)
+            except Exception:
+                pass
+
     group.setdefault("platforms", {})[platform] = subpath
     save_accounts(accounts)
-    print(f"✅ {platform_names[platform]} 登录完成，Session 已保存至 {profile_dir}")
+    print(f"✅ {name} session saved to {profile_dir}")
 
 
 def cmd_status(group_name, platform):
     if platform not in PLATFORMS:
-        print(f"错误：不支持的平台 {platform}，可选：{PLATFORMS}", file=sys.stderr)
+        print(f"Error: unsupported platform '{platform}'. Choose from: {PLATFORMS}", file=sys.stderr)
         sys.exit(1)
     accounts = load_accounts()
     group = next((g for g in accounts if g["name"] == group_name), None)
     if group is None:
-        print(f"错误：账号组「{group_name}」不存在", file=sys.stderr)
+        print(f"Error: account group '{group_name}' not found.", file=sys.stderr)
         sys.exit(1)
     # 两步验证：1. accounts.json 中有此平台 key；2. profile 目录存在
     subpath = group.get("platforms", {}).get(platform)
