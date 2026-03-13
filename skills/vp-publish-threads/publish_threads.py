@@ -54,25 +54,25 @@ def publish(file_path, title, description, tags, group):
         page.add_init_script(
             "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
         )
-        page.goto("https://www.threads.net/")
-        page.wait_for_load_state("networkidle")
+        page.goto("https://www.threads.com/")
+        page.wait_for_load_state("domcontentloaded")
         time.sleep(2)
 
         if "login" in page.url or page.locator('input[name="username"]').count() > 0:
             print("⚠️  请在浏览器中完成 Threads 登录...")
-            page.wait_for_url("https://www.threads.net/", timeout=120000)
+            page.wait_for_url("https://www.threads.com/", timeout=120000)
             time.sleep(3)
 
-        # 点击发帖按钮
+        # 点击首页的发帖输入框（同时也是文字输入区）
+        compose_sel = '[aria-label="Empty text field. Type to compose a new post."]'
         try:
-            compose_sel = '[aria-label="New thread"], [aria-label="发帖"], a[href="/new-post"]'
             page.wait_for_selector(compose_sel, timeout=15000)
             page.locator(compose_sel).first.click()
             time.sleep(1)
         except Exception:
-            print("⚠️  请手动点击发帖按钮")
+            print("⚠️  请手动点击发帖输入框")
 
-        # 上传媒体（可选，先上传再填文案）
+        # 上传媒体（可选）
         if file_path:
             try:
                 page.wait_for_selector('input[type="file"]', timeout=15000, state="attached")
@@ -82,11 +82,9 @@ def publish(file_path, title, description, tags, group):
             except Exception:
                 print("⚠️  请手动上传文件")
 
-        # 填写文案（title 作正文开头）
+        # 填写文案
         try:
-            text_sel = 'div[contenteditable="true"], textarea[placeholder]'
-            page.wait_for_selector(text_sel, timeout=15000)
-            text_area = page.locator(text_sel).first
+            text_area = page.locator(compose_sel).first
             text_area.click()
             full_text = title
             if description:
