@@ -56,18 +56,19 @@ def publish(file_path, title, description, tags, group):
             "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
         )
         page.goto("https://creator.xiaohongshu.com/publish/publish")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
+        time.sleep(2)
 
         if "login" in page.url or "sign" in page.url:
             print("⚠️  请在浏览器中扫码登录小红书...")
             page.wait_for_url("**/publish/**", timeout=120000)
             time.sleep(2)
 
-        # 视频模式切换
+        # 切换到视频上传模式
         ext = os.path.splitext(file_path)[1].lower()
-        if ext in [".mp4", ".mov", ".avi", ".mkv"]:
+        if ext in [".mp4", ".mov", ".avi", ".mkv", ".flv", ".m4v"]:
             try:
-                btn = page.locator('text=发布视频').first
+                btn = page.locator('text=上传视频').first
                 if btn.is_visible():
                     btn.click()
                     time.sleep(1)

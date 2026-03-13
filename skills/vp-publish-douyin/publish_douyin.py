@@ -56,7 +56,8 @@ def publish(file_path, title, description, tags, group):
             "Object.defineProperty(navigator, 'webdriver', { get: () => undefined });"
         )
         page.goto("https://creator.douyin.com/creator-micro/content/upload")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
+        time.sleep(2)
 
         if "login" in page.url or "passport" in page.url:
             print("⚠️  请在浏览器中完成登录...")
