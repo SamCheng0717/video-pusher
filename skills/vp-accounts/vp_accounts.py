@@ -153,7 +153,7 @@ def cmd_login(group_name, platform):
             selector = _ALREADY_LOGGED_IN_SELECTOR[platform]
             # Quick probe: upload UI visible within 6 s → already logged in
             try:
-                page.wait_for_selector(selector, timeout=6000)
+                page.wait_for_selector(selector, timeout=3000)
                 print(f"Already logged in to {name}.")
                 time.sleep(1)
             except Exception:
