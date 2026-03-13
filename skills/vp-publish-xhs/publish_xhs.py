@@ -97,11 +97,17 @@ def publish(file_path, title, description, tags, group):
             desc_area = page.locator('div[contenteditable="true"]').first
             desc_area.click()
             time.sleep(0.5)
-            full_text = description or ""
+            body = description or ""
+            if body:
+                desc_area.type(body, delay=30)
             tag_str = format_tags(tags)
             if tag_str:
-                full_text += "\n" + tag_str
-            desc_area.type(full_text, delay=30)
+                desc_area.type("\n", delay=30)
+                for tag in tag_str.split():
+                    desc_area.type(tag, delay=30)
+                    time.sleep(0.5)
+                    page.keyboard.press("Escape")
+                    desc_area.type(" ", delay=30)
         except Exception:
             print("⚠️  正文请手动填写")
 
