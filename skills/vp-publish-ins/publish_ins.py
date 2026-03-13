@@ -116,8 +116,11 @@ def publish(file_path, title, description, tags, group):
             print("⚠️  Caption 请手动填写")
 
         print("\n✅ 内容填写完毕！请检查后点击【分享 / Share】按钮")
-        input("\n发布完成后按回车关闭浏览器...")
-        context.close()
+        print("Close the browser window when done.")
+        try:
+            page.wait_for_event("close", timeout=0)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
