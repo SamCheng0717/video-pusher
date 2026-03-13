@@ -107,3 +107,40 @@ def test_cli_status_logged_in(tmp_path, monkeypatch):
     with pytest.raises(SystemExit) as exc:
         vp_accounts.cmd_status('A组', 'douyin')
     assert exc.value.code == 0
+
+
+def test_cli_remove_platform_success(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(vp_accounts, 'ACCOUNTS_FILE', str(tmp_path / 'accounts.json'))
+    monkeypatch.setattr(vp_accounts, 'PROFILE_BASE', str(tmp_path / 'profile'))
+    profile_dir = tmp_path / 'profile' / 'douyin' / 'group_0'
+    profile_dir.mkdir(parents=True)
+    data = [{'name': 'A组', 'platforms': {'douyin': 'douyin/group_0', 'xhs': 'xhs/group_0'}}]
+    vp_accounts.save_accounts(str(tmp_path / 'accounts.json'), data)
+
+    vp_accounts.cmd_remove_platform('A组', 'douyin')
+
+    # accounts.json no longer has douyin, xhs is untouched
+    accounts = vp_accounts.load_accounts(str(tmp_path / 'accounts.json'))
+    assert 'douyin' not in accounts[0]['platforms']
+    assert 'xhs' in accounts[0]['platforms']
+    # profile directory removed
+    assert not profile_dir.exists()
+    assert 'removed' in capsys.readouterr().out.lower()
+
+
+def test_cli_remove_platform_group_not_found(tmp_path, monkeypatch):
+    monkeypatch.setattr(vp_accounts, 'ACCOUNTS_FILE', str(tmp_path / 'accounts.json'))
+    monkeypatch.setattr(vp_accounts, 'PROFILE_BASE', str(tmp_path / 'profile'))
+    vp_accounts.cmd_add('A组')
+    with pytest.raises(SystemExit) as exc:
+        vp_accounts.cmd_remove_platform('不存在组', 'douyin')
+    assert exc.value.code == 1
+
+
+def test_cli_remove_platform_not_logged_in(tmp_path, monkeypatch):
+    monkeypatch.setattr(vp_accounts, 'ACCOUNTS_FILE', str(tmp_path / 'accounts.json'))
+    monkeypatch.setattr(vp_accounts, 'PROFILE_BASE', str(tmp_path / 'profile'))
+    vp_accounts.cmd_add('A组')
+    with pytest.raises(SystemExit) as exc:
+        vp_accounts.cmd_remove_platform('A组', 'douyin')
+    assert exc.value.code == 1
