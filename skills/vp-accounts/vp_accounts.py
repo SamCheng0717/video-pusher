@@ -144,12 +144,26 @@ def cmd_login(group_name, platform):
         )
         page.goto(url)
         page.wait_for_load_state("networkidle")
-        time.sleep(2)
 
         if platform in _LOGIN_URL_INDICATORS:
-            # Auto-detect: login causes a URL redirect to a known post-login URL
+            import json as _json
             indicators = _LOGIN_URL_INDICATORS[platform]
-            if any(ind in page.url for ind in indicators):
+            # Some platforms (e.g. Douyin) load the creator URL first, then
+            # JS checks auth and redirects to a login page.  A fixed sleep is
+            # unreliable — instead, actively wait up to 5 s to see whether a
+            # login-page redirect actually happens.
+            js_indicators = _json.dumps(indicators)
+            try:
+                page.wait_for_function(
+                    f"() => {js_indicators}.some(s => location.href.includes(s))",
+                    timeout=5000,
+                )
+                on_login_page = True
+            except Exception:
+                # No redirect to a login page within 5 s → check current URL
+                on_login_page = any(ind in page.url for ind in indicators)
+
+            if on_login_page:
                 print(f"Log in to {name} in the browser.")
                 print(f"Browser will close automatically once login is detected.\n")
                 try:
