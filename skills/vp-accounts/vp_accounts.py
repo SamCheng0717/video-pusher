@@ -171,8 +171,9 @@ def cmd_login(group_name, platform):
                 # Threads / Instagram: manual close
                 print(f"Log in to {name} in the browser.\n")
 
-            # All platforms: wait for user to close the browser
-            context.wait_for_event("close", timeout=0)
+            # All platforms: wait for user to close the window (macOS X button
+            # closes the page, not the full context, so listen to page close)
+            page.wait_for_event("close", timeout=0)
         except Exception:
             pass  # browser closed at any point — that's fine
 
