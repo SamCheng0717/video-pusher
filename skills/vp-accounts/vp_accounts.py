@@ -24,14 +24,20 @@ PLATFORM_URLS = {
 }
 PLATFORMS = list(PLATFORM_URLS.keys())
 
-# DOM selector that appears only when logged in on the creator/publish page.
-# These platforms are SPAs — the URL never changes on login/logout, so
-# URL-based detection is unreliable.  Waiting for the file-input element
-# is the most reliable signal that the upload UI (= logged-in state) is visible.
-_LOGIN_SUCCESS_SELECTOR = {
+# Quick DOM probe: selector visible within a few seconds = already logged in.
+# These platforms are SPAs; the URL does NOT change when the login screen
+# appears.  The file-input only renders once the upload UI is shown (logged in).
+_ALREADY_LOGGED_IN_SELECTOR = {
     "douyin":    'input[type="file"]',
     "xhs":       'input[type="file"]',
     "shipinhao": 'input[type="file"]',
+}
+
+# URL pattern that the page navigates to *after* a successful login.
+# Douyin: login success → redirects to /creator-micro/home
+# XHS / Shipinhao: no confirmed redirect; fall back to DOM selector.
+_POST_LOGIN_URL = {
+    "douyin": "**/creator-micro/home**",
 }
 PLATFORM_NAMES = {
     "douyin": "Douyin", "xhs": "Xiaohongshu", "shipinhao": "WeChat Channels",
@@ -143,19 +149,24 @@ def cmd_login(group_name, platform):
         page.goto(url)
         page.wait_for_load_state("networkidle")
 
-        if platform in _LOGIN_SUCCESS_SELECTOR:
-            selector = _LOGIN_SUCCESS_SELECTOR[platform]
-            # Quick probe: if the upload UI is already visible, already logged in
+        if platform in _ALREADY_LOGGED_IN_SELECTOR:
+            selector = _ALREADY_LOGGED_IN_SELECTOR[platform]
+            # Quick probe: upload UI visible within 6 s → already logged in
             try:
                 page.wait_for_selector(selector, timeout=6000)
                 print(f"Already logged in to {name}.")
                 time.sleep(1)
             except Exception:
-                # Upload UI not visible yet → login screen is showing
+                # Login screen is showing — wait for the user to log in
                 print(f"Log in to {name} in the browser.")
                 print(f"Browser will close automatically once login is detected.\n")
                 try:
-                    page.wait_for_selector(selector, timeout=294_000)
+                    if platform in _POST_LOGIN_URL:
+                        # Reliable: URL changes after login (e.g. Douyin → /home)
+                        page.wait_for_url(_POST_LOGIN_URL[platform], timeout=294_000)
+                    else:
+                        # Fallback: wait for upload UI to appear (XHS, Shipinhao)
+                        page.wait_for_selector(selector, timeout=294_000)
                     print(f"✅ Login detected! Closing browser...")
                     time.sleep(2)
                 except Exception:
