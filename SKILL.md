@@ -8,13 +8,18 @@ metadata:
   openclaw:
     requires:
       bins:
-        - python3
         - uv
     emoji: "📤"
     os:
       - darwin
       - linux
-      - Mac OS X
+      - win32
+    install:
+      - id: uv
+        kind: uv
+        package: uv
+        bins: ["uv"]
+        label: "Install uv (Python package manager)"
 ---
 
 # 多平台视频发布 Skills

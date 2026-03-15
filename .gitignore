@@ -6,6 +6,7 @@ __pycache__/
 .DS_Store
 *.egg-info/
 .pytest_cache/
+uv.lock
 .claude
 .playwright-mcp
 docs/superpowers
