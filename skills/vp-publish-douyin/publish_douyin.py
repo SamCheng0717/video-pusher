@@ -1,4 +1,10 @@
 # skills/vp-publish-douyin/publish_douyin.py
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#   "playwright>=1.40",
+# ]
+# ///
 """抖音自动发布脚本"""
 import argparse, time, os, sys, json
 

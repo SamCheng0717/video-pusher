@@ -3,7 +3,7 @@ name: video-pusher
 description: |
   多平台视频/图文内容发布技能集合。支持账号管理、登录状态维护、一键多平台发布。
   当用户要求发布内容到抖音、小红书、微信视频号、Threads、Instagram，或管理发布账号时触发。
-version: 1.0.0
+version: 1.2.0
 metadata:
   openclaw:
     requires:
@@ -20,6 +20,10 @@ metadata:
         package: uv
         bins: ["uv"]
         label: "Install uv (Python package manager)"
+      - id: playwright-chromium
+        kind: shell
+        command: "uv run playwright install chromium"
+        label: "Install Chromium browser (~150MB, required for automation)"
 ---
 
 # 多平台视频发布 Skills
@@ -45,6 +49,20 @@ metadata:
 7. **视频号发布**（"发布到视频号 / 视频号 / 公众号视频"）→ 执行 `vp-publish-shipinhao` 技能。
 8. **Threads 发布**（"发布到 Threads / Threads"）→ 执行 `vp-publish-threads` 技能。
 9. **Instagram 发布**（"发布到 Instagram / ins / IG"）→ 执行 `vp-publish-ins` 技能。
+
+## 环境初始化（首次使用必须）
+
+**在执行任何发布或登录操作前，先检查 Chromium 是否已安装。若未安装或用户首次使用，自动依次运行：**
+
+```bash
+uv sync
+uv run playwright install chromium
+```
+
+触发条件（满足任意一条即执行）：
+- `profile/` 目录不存在
+- 用户提到"第一次"、"刚安装"、"浏览器打不开"、"chromium"
+- 运行发布/登录脚本时出现 `BrowserType.launch_persistent_context` 相关报错
 
 ## 全局约束
 

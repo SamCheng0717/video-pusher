@@ -1,4 +1,10 @@
 # skills/vp-publish-shipinhao/publish_shipinhao.py
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#   "playwright>=1.40",
+# ]
+# ///
 """视频号自动发布脚本"""
 import argparse, time, os, json
 

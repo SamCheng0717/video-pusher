@@ -1,3 +1,9 @@
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#   "playwright>=1.40",
+# ]
+# ///
 """Instagram 自动发布脚本"""
 import argparse, time, os, json
 

@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 首次使用 / 环境初始化
+
+**每次进入新环境或用户首次使用时，主动执行以下命令确保环境就绪：**
+
+```bash
+uv sync
+uv run playwright install chromium
+```
+
+> 判断标准：如果 `profile/` 目录不存在，或用户提到"刚安装"、"第一次用"、"浏览器打不开"，立即运行上述两条命令。
+
 ## Commands
 
 ```bash

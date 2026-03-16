@@ -1,4 +1,10 @@
 # skills/vp-accounts/vp_accounts.py
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#   "playwright>=1.40",
+# ]
+# ///
 import os, sys, json, argparse
 from pathlib import Path
 

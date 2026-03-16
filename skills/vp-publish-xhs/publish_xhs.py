@@ -1,4 +1,10 @@
 # skills/vp-publish-xhs/publish_xhs.py
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#   "playwright>=1.40",
+# ]
+# ///
 """小红书自动发布脚本"""
 import argparse, time, os, json
 
