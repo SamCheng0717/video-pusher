@@ -12,6 +12,19 @@
 
 ---
 
+## 💬 直接对 AI 说就能用
+
+无需记命令，直接用自然语言告诉 Claude / OpenClaw：
+
+| 你说的话 | AI 做什么 |
+|---------|---------|
+| `视频发布助手查看账号状态` | 列出所有账号组及各平台登录情况 |
+| `视频发布助手创建账号组「测试」` | 新建名为「测试」的账号组 |
+| `视频发布助手登录小红书/Instagram/抖音/微信视频号/Threads` | 依次打开浏览器完成各平台登录，关闭窗口自动保存 |
+| `发布 /Users/me/video.mp4 到测试组，标题「2美女骑车骑电动车打闹，双双栽进花坛里」，简介帮我编，标签 美女 电动车 搞笑` | 检查登录状态，依次打开五个平台浏览器，自动填写内容等你点发布 |
+
+---
+
 <a name="chinese"></a>
 
 ## 📖 简介
@@ -52,7 +65,7 @@ Claude：
 **方式一：Claude Code**
 
 ```bash
-git clone https://github.com/your-username/video-pusher
+git clone https://github.com/SamCheng0717/video-pusher
 cd video-pusher
 uv sync
 uv run playwright install chromium   # 首次必须，约 150MB
@@ -61,7 +74,7 @@ uv run playwright install chromium   # 首次必须，约 150MB
 **方式二：OpenClaw / ClawHub**
 
 ```bash
-clawhub install your-username/video-pusher
+clawhub install SamCheng0717/video-pusher
 uv run playwright install chromium
 ```
 
@@ -171,6 +184,19 @@ uv run pytest tests/test_vp_accounts.py -v   # 运行单个测试文件
 
 <a name="english"></a>
 
+## 💬 Just Talk to Your AI
+
+No commands to memorize — just tell Claude / OpenClaw in plain English:
+
+| What you say | What AI does |
+|-------------|-------------|
+| `Show my video publisher account status` | Lists all account groups and login status per platform |
+| `Create account group "MyBrand"` | Creates a new account group named "MyBrand" |
+| `Log in to Douyin / Xiaohongshu / WeChat Channels / Threads / Instagram for MyBrand` | Opens browser for each platform, saves session on close |
+| `Publish /path/to/video.mp4 to MyBrand, title "Two girls crash bikes into flower beds", write a description, tags: funny girls scooter` | Checks login, opens each platform browser, fills everything in — you just click Publish |
+
+---
+
 ## 📖 Overview
 
 **Video Pusher** is a collection of AI Skills for [Claude Code](https://claude.ai/code) / [OpenClaw](https://openclaw.ai) that automates multi-platform video publishing. The AI controls the browser to fill in titles, descriptions, tags, and upload files — you just review and click "Publish".
@@ -191,7 +217,7 @@ uv run pytest tests/test_vp_accounts.py -v   # 运行单个测试文件
 **Option 1: Claude Code**
 
 ```bash
-git clone https://github.com/your-username/video-pusher
+git clone https://github.com/SamCheng0717/video-pusher
 cd video-pusher
 uv sync
 uv run playwright install chromium   # Required on first run (~150MB)
@@ -200,7 +226,7 @@ uv run playwright install chromium   # Required on first run (~150MB)
 **Option 2: OpenClaw / ClawHub**
 
 ```bash
-clawhub install your-username/video-pusher
+clawhub install SamCheng0717/video-pusher
 uv run playwright install chromium
 ```
 
